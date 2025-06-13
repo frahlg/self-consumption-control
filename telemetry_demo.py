@@ -26,12 +26,30 @@ class MockTelemetryCollector(TelemetryCollector):
     def __init__(self, sample_data: List[Dict[str, Any]], sample_rate: float = 2.0):
         # Don't call super().__init__ to avoid creating real controller
         self.sample_data = sample_data
+        self.sample_rate = sample_rate
         self.sample_interval = 1.0 / sample_rate
         self.queue = asyncio.Queue(maxsize=100)
         self.running = False
         self.sample_count = 0
         self.error_count = 0
         self.current_index = 0
+        
+        # Initialize ring buffers (same as real collector)
+        from collections import deque, defaultdict
+        self.short_window_seconds = 30
+        self.long_window_seconds = 300
+        self.short_buffer_size = int(self.short_window_seconds * sample_rate)
+        self.long_buffer_size = int(self.long_window_seconds * sample_rate)
+        
+        self.short_buffers = defaultdict(lambda: deque(maxlen=self.short_buffer_size))
+        self.long_buffers = defaultdict(lambda: deque(maxlen=self.long_buffer_size))
+        self.sample_buffer = deque(maxlen=self.short_buffer_size)
+        
+        self.buffer_keys = [
+            'solar_power', 'battery_power', 'grid_power', 'load_power',
+            'battery_soc', 'battery_voltage', 'battery_current', 'battery_temperature',
+            'grid_frequency', 'inverter_temperature'
+        ]
     
     async def start(self) -> bool:
         """Mock start - always succeeds."""
@@ -71,12 +89,30 @@ class StubTelemetryCollector(TelemetryCollector):
     def __init__(self, scenario: str = "normal", sample_rate: float = 2.0):
         # Don't call super().__init__ to avoid creating real controller
         self.scenario = scenario
+        self.sample_rate = sample_rate
         self.sample_interval = 1.0 / sample_rate
         self.queue = asyncio.Queue(maxsize=100)
         self.running = False
         self.sample_count = 0
         self.error_count = 0
         self.start_time = time.time()
+        
+        # Initialize ring buffers (same as real collector)
+        from collections import deque, defaultdict
+        self.short_window_seconds = 30
+        self.long_window_seconds = 300
+        self.short_buffer_size = int(self.short_window_seconds * sample_rate)
+        self.long_buffer_size = int(self.long_window_seconds * sample_rate)
+        
+        self.short_buffers = defaultdict(lambda: deque(maxlen=self.short_buffer_size))
+        self.long_buffers = defaultdict(lambda: deque(maxlen=self.long_buffer_size))
+        self.sample_buffer = deque(maxlen=self.short_buffer_size)
+        
+        self.buffer_keys = [
+            'solar_power', 'battery_power', 'grid_power', 'load_power',
+            'battery_soc', 'battery_voltage', 'battery_current', 'battery_temperature',
+            'grid_frequency', 'inverter_temperature'
+        ]
     
     async def start(self) -> bool:
         """Stub start - always succeeds."""
