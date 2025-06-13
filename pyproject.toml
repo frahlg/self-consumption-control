@@ -1,0 +1,18 @@
+[project]
+name = "self-consumption-control"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "pymodbus>=3.6.0",
+    "pyyaml>=6.0",
+    "simple-pid>=2.0.1",
+]
+
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+py-modules = ["main", "modbus_client", "sungrow_controller", "monitor"]

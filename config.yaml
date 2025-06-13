@@ -1,0 +1,490 @@
+# Sungrow Modbus Configuration
+# Based on the comprehensive Home Assistant integration
+# https://github.com/mkaiser/Sungrow-SHx-Inverter-Modbus-Home-Assistant
+
+modbus:
+  host: "192.168.192.10"
+  port: 502
+  slave_id: 1
+  timeout: 10
+  delay: 0.1
+
+# Register definitions with proper function codes, data types, and scaling
+registers:
+  # Device Information
+  inverter_serial:
+    address: 4989
+    function_code: 4  # input registers
+    data_type: string
+    count: 10
+    description: "Inverter serial number"
+    
+  device_type_code:
+    address: 4999
+    function_code: 4
+    data_type: uint16
+    description: "Device type code"
+    
+  # Temperature and Environmental
+  inverter_temperature:
+    address: 5007
+    function_code: 4
+    data_type: int16
+    scale: 0.1
+    unit: "°C"
+    description: "Inverter temperature"
+    
+  grid_frequency:
+    address: 5241
+    function_code: 4
+    data_type: uint16
+    scale: 0.01
+    unit: "Hz"
+    description: "Grid frequency"
+    
+  # MPPT (Solar Input) Monitoring
+  mppt1_voltage:
+    address: 5010
+    function_code: 4
+    data_type: uint16
+    scale: 0.1
+    unit: "V"
+    description: "MPPT1 voltage"
+    
+  mppt1_current:
+    address: 5011
+    function_code: 4
+    data_type: uint16
+    scale: 0.1
+    unit: "A"
+    description: "MPPT1 current"
+    
+  mppt2_voltage:
+    address: 5012
+    function_code: 4
+    data_type: uint16
+    scale: 0.1
+    unit: "V"
+    description: "MPPT2 voltage"
+    
+  mppt2_current:
+    address: 5013
+    function_code: 4
+    data_type: uint16
+    scale: 0.1
+    unit: "A"
+    description: "MPPT2 current"
+    
+  # Solar Power Generation
+  total_dc_power:
+    address: 5016
+    function_code: 4
+    data_type: uint32
+    endian: big
+    swap: word
+    scale: 1
+    unit: "W"
+    description: "Total DC power from solar panels"
+    
+  daily_pv_generation:
+    address: 13001
+    function_code: 4
+    data_type: uint16
+    scale: 0.1
+    unit: "kWh"
+    description: "Daily PV generation"
+    
+  total_pv_generation:
+    address: 13002
+    function_code: 4
+    data_type: uint32
+    endian: big
+    scale: 0.1
+    unit: "kWh"
+    description: "Total PV generation"
+    
+  # Grid Phase Monitoring
+  phase_a_voltage:
+    address: 5018
+    function_code: 4
+    data_type: uint16
+    scale: 0.1
+    unit: "V"
+    description: "Phase A voltage"
+    
+  phase_b_voltage:
+    address: 5019
+    function_code: 4
+    data_type: uint16
+    scale: 0.1
+    unit: "V"
+    description: "Phase B voltage"
+    
+  phase_c_voltage:
+    address: 5020
+    function_code: 4
+    data_type: uint16
+    scale: 0.1
+    unit: "V"
+    description: "Phase C voltage"
+    
+  phase_a_current:
+    address: 13030
+    function_code: 4
+    data_type: int16
+    scale: 0.1
+    unit: "A"
+    description: "Phase A current"
+    
+  phase_b_current:
+    address: 13031
+    function_code: 4
+    data_type: int16
+    scale: 0.1
+    unit: "A"
+    description: "Phase B current"
+    
+  phase_c_current:
+    address: 13032
+    function_code: 4
+    data_type: int16
+    scale: 0.1
+    unit: "A"
+    description: "Phase C current"
+    
+  # Grid Power Flow
+  meter_active_power:
+    address: 5600
+    function_code: 4
+    data_type: int32
+    endian: big
+    scale: 1
+    unit: "W"
+    description: "Meter active power (+ = export, - = import)"
+    
+  export_power_raw:
+    address: 13009
+    function_code: 4
+    data_type: int32
+    endian: big
+    swap: word
+    scale: 1
+    unit: "W"
+    description: "Export power raw (+ = export, - = import)"
+    
+  load_power:
+    address: 13007
+    function_code: 4
+    data_type: int32
+    endian: big
+    scale: 1
+    unit: "W"
+    description: "Load power consumption"
+    
+  total_active_power:
+    address: 13033
+    function_code: 4
+    data_type: int32
+    endian: big
+    scale: 1
+    unit: "W"
+    description: "Total active power"
+    
+  # Battery Monitoring
+  battery_voltage:
+    address: 13019
+    function_code: 4
+    data_type: uint16
+    scale: 0.1
+    unit: "V"
+    description: "Battery voltage"
+    
+  battery_current:
+    address: 13020
+    function_code: 4
+    data_type: int16
+    scale: 0.1
+    unit: "A"
+    description: "Battery current (+ = charge, - = discharge)"
+    
+  battery_power_raw:
+    address: 13021
+    function_code: 4
+    data_type: int16
+    scale: 1
+    unit: "W"
+    description: "Battery power (firmware dependent sign)"
+    
+  battery_level:
+    address: 13022
+    function_code: 4
+    data_type: uint16
+    scale: 0.1
+    unit: "%"
+    description: "Battery level (SOC)"
+    
+  battery_temperature:
+    address: 13024
+    function_code: 4
+    data_type: int16
+    scale: 0.1
+    unit: "°C"
+    description: "Battery temperature"
+    
+  battery_state_of_health:
+    address: 13023
+    function_code: 4
+    data_type: uint16
+    scale: 0.1
+    unit: "%"
+    description: "Battery state of health"
+    
+  battery_capacity:
+    address: 5638
+    function_code: 4
+    data_type: uint16
+    scale: 0.01
+    unit: "kWh"
+    description: "Battery capacity"
+    
+  # Battery Energy Counters
+  daily_battery_charge:
+    address: 13039
+    function_code: 4
+    data_type: uint16
+    scale: 0.1
+    unit: "kWh"
+    description: "Daily battery charge"
+    
+  total_battery_charge:
+    address: 13040
+    function_code: 4
+    data_type: uint32
+    endian: big
+    scale: 0.1
+    unit: "kWh"
+    description: "Total battery charge"
+    
+  daily_battery_discharge:
+    address: 13025
+    function_code: 4
+    data_type: uint16
+    scale: 0.1
+    unit: "kWh"
+    description: "Daily battery discharge"
+    
+  total_battery_discharge:
+    address: 13026
+    function_code: 4
+    data_type: uint32
+    endian: big
+    scale: 0.1
+    unit: "kWh"
+    description: "Total battery discharge"
+    
+  # System State
+  system_state:
+    address: 12999
+    function_code: 4
+    data_type: uint16
+    description: "System state code"
+    
+  running_state:
+    address: 13000
+    function_code: 4
+    data_type: uint16
+    description: "Running state code"
+    
+  # Grid Energy Counters
+  daily_imported_energy:
+    address: 13035
+    function_code: 4
+    data_type: uint16
+    scale: 0.1
+    unit: "kWh"
+    description: "Daily imported energy"
+    
+  total_imported_energy:
+    address: 13036
+    function_code: 4
+    data_type: uint32
+    endian: big
+    scale: 0.1
+    unit: "kWh"
+    description: "Total imported energy"
+    
+  daily_exported_energy:
+    address: 13044
+    function_code: 4
+    data_type: uint16
+    scale: 0.1
+    unit: "kWh"
+    description: "Daily exported energy"
+    
+  total_exported_energy:
+    address: 13045
+    function_code: 4
+    data_type: uint32
+    endian: big
+    scale: 0.1
+    unit: "kWh"
+    description: "Total exported energy"
+    
+  # Power Factor and Reactive Power
+  power_factor:
+    address: 5034
+    function_code: 4
+    data_type: int16
+    scale: 0.001
+    unit: "%"
+    description: "Power factor"
+    
+  reactive_power:
+    address: 5032
+    function_code: 4
+    data_type: int32
+    endian: big
+    scale: 1
+    unit: "W"
+    description: "Reactive power"
+    
+  # === CONTROL REGISTERS (Holding Registers) ===
+  
+  # EMS Mode Control
+  ems_mode_selection:
+    address: 13049
+    function_code: 3  # holding registers
+    data_type: uint16
+    description: "EMS mode (0=Self-consumption, 2=Forced, 3=External EMS)"
+    writable: true
+    
+  battery_forced_charge_discharge_cmd:
+    address: 13050
+    function_code: 3
+    data_type: uint16
+    description: "Battery forced cmd (0xAA=charge, 0xBB=discharge, 0xCC=stop)"
+    writable: true
+    
+  battery_forced_charge_discharge_power:
+    address: 13051
+    function_code: 3
+    data_type: uint16
+    scale: 1
+    unit: "W"
+    description: "Battery forced charge/discharge power"
+    writable: true
+    
+  # SOC Limits
+  max_soc:
+    address: 13057
+    function_code: 3
+    data_type: uint16
+    scale: 0.1
+    unit: "%"
+    description: "Maximum SOC limit"
+    writable: true
+    
+  min_soc:
+    address: 13058
+    function_code: 3
+    data_type: uint16
+    scale: 0.1
+    unit: "%"
+    description: "Minimum SOC limit"
+    writable: true
+    
+  # Export Power Limit
+  export_power_limit:
+    address: 13073
+    function_code: 3
+    data_type: uint16
+    scale: 1
+    unit: "W"
+    description: "Export power limit"
+    writable: true
+    
+  export_power_limit_mode:
+    address: 13086
+    function_code: 3
+    data_type: uint16
+    description: "Export power limit mode (0xAA=enabled, 0x55=disabled)"
+    writable: true
+    
+  # Backup Settings
+  backup_mode:
+    address: 13074
+    function_code: 3
+    data_type: uint16
+    description: "Backup mode (0xAA=enabled, 0x55=disabled)"
+    writable: true
+    
+  reserved_soc_for_backup:
+    address: 13099
+    function_code: 3
+    data_type: uint16
+    scale: 1
+    unit: "%"
+    description: "Reserved SOC for backup"
+    writable: true
+    
+  # Battery Power Limits
+  battery_max_charge_power:
+    address: 33046
+    function_code: 3
+    data_type: uint16
+    scale: 10
+    unit: "W"
+    description: "Battery max charge power"
+    writable: true
+    
+  battery_max_discharge_power:
+    address: 33047
+    function_code: 3
+    data_type: uint16
+    scale: 10
+    unit: "W"
+    description: "Battery max discharge power"
+    writable: true
+    
+  battery_charging_start_power:
+    address: 33148
+    function_code: 3
+    data_type: uint16
+    scale: 10
+    unit: "W"
+    description: "Battery charging start power threshold"
+    writable: true
+    
+  battery_discharging_start_power:
+    address: 33149
+    function_code: 3
+    data_type: uint16
+    scale: 10
+    unit: "W"
+    description: "Battery discharging start power threshold"
+    writable: true
+
+# Legacy registers for backward compatibility
+legacy_registers:
+  active_power:
+    address: 13033
+    function_code: 4
+    data_type: int32
+    endian: big
+    scale: 1
+    unit: "W"
+    
+  daily_energy:
+    address: 13001
+    function_code: 4
+    data_type: uint16
+    scale: 0.1
+    unit: "kWh"
+    
+  total_energy:
+    address: 13002
+    function_code: 4
+    data_type: uint32
+    endian: big
+    scale: 0.1
+    unit: "kWh" 
