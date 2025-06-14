@@ -1,0 +1,72 @@
+# InfluxDB Pusher Service Configuration
+
+influxdb:
+  url: "http://localhost:8086"
+  token: "BVRPy1ZDD5YxpvQiXpH8rezp5INDejHEmFhFYBD-fcZkSvwSbZ0b8vIbaD3WFTHzbodf848DhEKPeyve6RViGw=="
+  org: "local"
+  bucket: "data"
+
+# Data collection settings
+collection:
+  sample_rate: 0.18  # Hz - data collection frequency (~5.5s intervals to match Modbus speed)
+  batch_size: 1      # Number of points to batch before writing
+  
+# Performance tuning for high-frequency writes
+performance:
+  batch_size: 500        # points - high batch size for throughput
+  flush_interval: 1000   # milliseconds - 1 second flush window
+  max_queue_size: 1000
+  write_timeout: 30000   # milliseconds
+  max_retries: 3
+  
+# Logging
+logging:
+  level: "INFO"
+  show_progress_interval: 10  # Show progress every N samples (~1 minute at 0.18Hz)
+
+# Measurement configuration
+measurement:
+  name: "energy_system"
+  
+  # Tags to add to all points
+  tags:
+    source: "sungrow_controller"
+    location: "solar_system"
+    
+  # Fields to collect (all numeric values)
+  fields:
+    power:
+      - solar_power
+      - battery_power
+      - grid_power
+      - load_power
+      - total_power
+    battery:
+      - battery_soc
+      - battery_voltage
+      - battery_current
+      - battery_temperature
+    system:
+      - grid_frequency
+      - inverter_temperature
+    phases:
+      - phase_a_voltage
+      - phase_b_voltage
+      - phase_c_voltage
+      - phase_a_current
+      - phase_b_current
+      - phase_c_current
+    mppt:
+      - mppt1_voltage
+      - mppt1_current
+      - mppt2_voltage
+      - mppt2_current
+    energy:
+      - daily_pv_generation
+      - daily_imported_energy
+      - daily_exported_energy
+      - daily_battery_charge
+      - daily_battery_discharge
+    state:
+      - running_state  # integer field
+      - ems_mode       # integer field 

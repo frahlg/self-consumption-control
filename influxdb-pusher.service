@@ -1,0 +1,29 @@
+[Unit]
+Description=InfluxDB High-Frequency Data Pusher Service
+After=network.target influxdb.service
+Requires=network.target
+Wants=influxdb.service
+
+[Service]
+Type=simple
+User=fredde
+WorkingDirectory=/Users/fredde/sandbox/self-consumption-control
+ExecStart=/Users/fredde/sandbox/self-consumption-control/.venv/bin/python influxdb_pusher.py
+Restart=always
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+
+# Environment variables
+Environment=PYTHONPATH=/Users/fredde/sandbox/self-consumption-control
+Environment=PYTHONUNBUFFERED=1
+
+# Resource limits for high-frequency operation
+LimitNOFILE=65536
+Nice=-10
+
+# Logging
+SyslogIdentifier=influxdb-pusher
+
+[Install]
+WantedBy=multi-user.target 

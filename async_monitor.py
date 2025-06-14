@@ -1,26 +1,38 @@
 #!/usr/bin/env python3
 """
 Async Enhanced Sungrow Monitor
-Uses telemetry queue abstraction for all data access.
+Producer-Consumer architecture with Rich Live UI at 5fps.
 """
 
 import asyncio
-import signal
-import sys
-import os
-import time
-from collections import deque, defaultdict
-import statistics
-import math
-from typing import Dict, Optional, List
-from telemetry import TelemetryCollector, TelemetrySample, create_telemetry_system
-import logging
-
-# Configure logging
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
-logger = logging.getLogger(__name__)
+from telemetry import create_telemetry_system
+from simple_live_monitor import SimpleEnergyMonitor
 
 
+async def main():
+    """Enhanced async monitor with producer-consumer UI architecture."""
+    
+    # Create telemetry system
+    print("🔧 Initializing enhanced energy management system...")
+    collector = await create_telemetry_system()
+    
+    # Create and run simple monitor (fixed version without Rich Live hanging)
+    monitor = SimpleEnergyMonitor(collector) 
+    await monitor.run()
+    
+    print("\n✅ Enhanced monitor stopped gracefully")
+
+
+if __name__ == "__main__":
+    try:
+        asyncio.run(main())
+    except KeyboardInterrupt:
+        print("\n👋 Goodbye!")
+    except Exception as e:
+        print(f"\n💥 Unexpected error: {e}")
+
+
+# Legacy compatibility class (deprecated)
 class AsyncSungrowMonitor:
     """Enhanced async monitor that gets all data from telemetry queue and uses ring buffers."""
     
@@ -316,35 +328,4 @@ class AsyncSungrowMonitor:
             print("🔌 Async monitor stopped")
 
 
-async def main():
-    """Main async function."""
-    print("🏠 Async Enhanced Sungrow Monitor")
-    print("🌡️ Thermodynamically Correct Energy Balance Analysis")
-    print("📊 Async Telemetry Queue Architecture (2 Hz)")
-    print("=" * 60)
-    
-    try:
-        # Create telemetry system
-        collector = await create_telemetry_system(sample_rate=2.0)
-        
-        # Create monitor
-        monitor = AsyncSungrowMonitor(collector)
-        
-        # Run monitor
-        await monitor.run()
-        
-    except Exception as e:
-        logger.error(f"Failed to start async monitor: {e}")
-        print(f"❌ Failed to start monitor: {e}")
-    finally:
-        # Cleanup
-        if 'collector' in locals():
-            await collector.stop()
-
-
-if __name__ == "__main__":
-    # Set up proper async logging
-    logging.getLogger('asyncio').setLevel(logging.WARNING)
-    
-    # Run the async monitor
-    asyncio.run(main()) 
+    # (Legacy implementation kept for backward compatibility) 

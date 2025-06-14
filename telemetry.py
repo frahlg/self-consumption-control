@@ -81,12 +81,13 @@ class TelemetrySample:
                 logger.warning(f"Invalid grid frequency: {self.grid_frequency} Hz")
                 return False
                 
-            if self.solar_power < 0:
-                logger.warning(f"Negative solar power: {self.solar_power} W")
+            # Solar power should be negative (generation), only warn if extremely negative
+            if self.solar_power < -50000:  # > 50kW seems unrealistic for most systems
+                logger.warning(f"Extremely negative solar power: {self.solar_power} W")
                 return False
                 
-            # Energy balance check (allow some tolerance for measurement errors)
-            calculated_load = self.solar_power - self.battery_power - self.grid_power
+            # Energy balance check using correct equation: P_load = P_grid - P_battery - P_solar
+            calculated_load = self.grid_power - self.battery_power - self.solar_power
             if abs(calculated_load - self.load_power) > 100:  # 100W tolerance
                 logger.debug(f"Energy balance deviation: calculated={calculated_load:.0f}W, "
                            f"stored={self.load_power:.0f}W")
@@ -224,12 +225,21 @@ class TelemetryCollector:
             # Get current state from controller
             state = self.controller.get_current_state()
             
+            # Get power values for energy balance calculation
+            solar_power = state['power'].get('solar_power', 0)
+            battery_power = state['power'].get('battery_power', 0)
+            grid_power = state['power'].get('grid_power', 0)
+            
+            # Calculate load power from energy balance: P_load = P_grid - P_battery - P_solar
+            # This is more accurate than the load_power register
+            calculated_load = grid_power - battery_power - solar_power
+            
             # Create sample with all data
             sample = TelemetrySample(
                 # Power data
-                solar_power=state['power'].get('solar_power', 0),
-                battery_power=state['power'].get('battery_power', 0),
-                grid_power=state['power'].get('grid_power', 0),
+                solar_power=solar_power,
+                battery_power=battery_power,
+                grid_power=grid_power,
                 total_power=state['power'].get('total_power', 0),
                 
                 # Battery data  
@@ -264,8 +274,8 @@ class TelemetryCollector:
                 inverter_serial=state['system'].get('inverter_serial', ''),
                 device_type_code=0,  # Not currently in state dict
                 
-                # Calculate load power from energy balance
-                load_power=0,  # Will be calculated in validate()
+                # Use calculated load power from energy balance
+                load_power=calculated_load,
                 
                 # Quality indicators
                 data_valid=True,

@@ -190,16 +190,27 @@ class SungrowController:
             return False
     
     def _update_power_data(self):
-        """Update power measurements."""
+        """Update power measurements with correct sign conventions."""
         data = self.client.get_power_data()
         
-        self.power_data.solar_power = data.get('total_dc_power', 0.0) or 0.0
-        self.power_data.total_power = data.get('total_active_power', 0.0) or 0.0
-        self.power_data.load_power = data.get('load_power', 0.0) or 0.0
+        # Apply correct sign conventions at source:
+        # - Generation (solar) should be NEGATIVE (energy production)
+        # - Load should be POSITIVE (energy consumption)
+        raw_solar = data.get('total_dc_power', 0.0) or 0.0
+        self.power_data.solar_power = -raw_solar if raw_solar > 0 else 0.0  # Convert positive to negative for generation
+        
+        # Total AC power output (generation side, should be negative)  
+        raw_total = data.get('total_active_power', 0.0) or 0.0
+        self.power_data.total_power = -raw_total if raw_total > 0 else raw_total  # Keep negative, convert positive to negative
+        
+        # Load power should be positive (consumption) - keep as-is since it should already be positive
+        raw_load = data.get('load_power', 0.0) or 0.0
+        self.power_data.load_power = raw_load  # Keep original value
         
         # Grid power (export_power_raw: + = export, - = import)
-        export_power = data.get('export_power_raw', 0.0) or 0.0
-        self.power_data.grid_power = export_power
+        # Need to invert sign for our convention: + = import, - = export
+        export_power_raw = data.get('export_power_raw', 0.0) or 0.0
+        self.power_data.grid_power = -export_power_raw  # Invert: positive export becomes negative
         
         # Battery power (raw value, sign depends on firmware)
         battery_raw = data.get('battery_power_raw', 0.0) or 0.0

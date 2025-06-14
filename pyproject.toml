@@ -8,6 +8,8 @@ dependencies = [
     "pymodbus>=3.6.0",
     "pyyaml>=6.0",
     "simple-pid>=2.0.1",
+    "rich>=13.0.0",
+    "influxdb-client>=1.44.0",
 ]
 
 [build-system]
