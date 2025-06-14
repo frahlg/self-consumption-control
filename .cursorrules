@@ -1,0 +1,122 @@
+# Sungrow Inverter Control & Testing Sandbox - Cursor Rules
+
+## Project Context
+This is a **sandbox tooling project** for testing and controlling Sungrow solar inverters via Modbus TCP. It's designed for experimentation, testing, and developing control algorithms for solar energy management systems.
+
+## Code Style & Standards
+
+### Python Standards
+- Use Python 3.12+ features
+- Follow PEP 8 with 120 character line limit for this hardware/IoT project
+- Use type hints for all function parameters and return values
+- Prefer descriptive variable names for hardware registers and control states
+- Use dataclasses for structured data (inverter states, register mappings)
+
+### Import Organization
+```python
+# Standard library
+import asyncio
+import logging
+from typing import Dict, Optional, Union
+
+# Third-party
+import yaml
+from pymodbus.client.tcp import ModbusTcpClient
+from rich.console import Console
+
+# Local modules
+from modbus_client import SungrowModbusClient
+from sungrow_controller import SungrowController
+```
+
+### Error Handling for Hardware
+- Always wrap Modbus communication in try-catch blocks
+- Implement connection retries with exponential backoff
+- Log hardware communication errors with context
+- Gracefully handle inverter disconnections
+- Validate register values before processing
+
+## Project-Specific Guidelines
+
+### Modbus Communication
+- Use proper register address calculations (Modbus addressing can be 0-based or 1-based)
+- Handle big-endian/little-endian byte order correctly for different registers
+- Implement proper scaling factors for register values
+- Always validate register ranges before reading/writing
+- Use descriptive names for register mappings
+
+### Configuration Management
+- Keep all register mappings in `config.yaml`
+- Use environment variables for sensitive data (IP addresses, credentials)
+- Validate configuration on startup
+- Support multiple inverter profiles/models
+
+### Safety & Control
+- Implement safety limits for all control operations
+- Always check inverter state before sending control commands
+- Log all control actions with timestamps
+- Implement emergency stop functionality
+- Validate control parameters against inverter specifications
+
+### Testing & Debugging
+- Create comprehensive tests for all Modbus register operations
+- Mock hardware for unit tests
+- Provide debug modes with verbose logging
+- Include register value validation in tests
+- Create example scripts for common use cases
+
+## File Naming Conventions
+- `*_client.py` - Communication layer modules
+- `*_controller.py` - Control logic modules  
+- `*_monitor.py` - Monitoring and display modules
+- `test_*.py` - Test modules
+- `debug_*.py` - Debug and diagnostic tools
+- `automation_*.py` - Automation and scheduling scripts
+
+## Documentation Requirements
+- Document all register mappings with addresses, data types, and scaling
+- Include example usage for all public functions
+- Document hardware-specific behaviors and quirks
+- Provide troubleshooting guides for common issues
+- Include safety warnings for control operations
+
+## Dependencies & Architecture
+- Keep Modbus communication separate from business logic
+- Use dependency injection for testability
+- Implement proper logging throughout
+- Support both synchronous and asynchronous operations where beneficial
+- Design for multiple inverter support
+
+## Logging Standards
+```python
+import logging
+
+# Configure detailed logging for hardware operations
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
+
+# Use structured logging for register operations
+logger.info("Reading register", extra={
+    "register": "battery_soc", 
+    "address": 13022,
+    "value": soc_value
+})
+```
+
+## Development Workflow
+- Always test with actual hardware when possible
+- Validate register mappings against official documentation
+- Create backup configurations before major changes
+- Test all control operations in safe conditions first
+- Keep detailed logs of hardware behavior
+
+## Refactoring Guidelines
+- Extract common patterns into base classes
+- Separate concerns: communication, control, monitoring, UI
+- Use factory patterns for different inverter models
+- Implement proper interfaces for extensibility
+- Maintain backward compatibility for existing configurations
+
+Remember: This is a **sandbox/tooling project** - prioritize experimentation, clear documentation, and safe hardware interaction over production optimization. 

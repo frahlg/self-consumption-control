@@ -1,0 +1,284 @@
+# Sungrow Inverter Control System - Architecture Documentation
+
+## 🏗️ System Overview
+This is a **sandbox tooling project** for testing, monitoring, and controlling Sungrow solar inverters via Modbus TCP. The system is designed for experimentation with solar energy management algorithms and hardware integration testing.
+
+## 📋 Project Purpose
+- **Primary**: Test and validate Sungrow inverter control via Modbus
+- **Secondary**: Develop solar energy management and optimization algorithms  
+- **Tertiary**: Create reusable tooling for solar system integration
+- **Context**: Sandbox environment for hardware experimentation
+
+## 🏛️ Architecture Layers
+
+### 1. Communication Layer
+```
+┌─────────────────────────────────────┐
+│         Communication Layer         │
+├─────────────────────────────────────┤
+│ • modbus_client.py                  │
+│   - TCP connection management       │
+│   - Register read/write operations  │
+│   - Endianness handling            │
+│   - Error handling & retries       │
+│                                     │
+│ • config.yaml                       │
+│   - Register mappings (53 sensors)  │
+│   - Control registers (13 writable) │
+│   - Scaling factors & data types    │
+└─────────────────────────────────────┘
+```
+
+### 2. Control Layer  
+```
+┌─────────────────────────────────────┐
+│           Control Layer             │
+├─────────────────────────────────────┤
+│ • sungrow_controller.py             │
+│   - High-level control interface    │
+│   - Safety validation              │
+│   - Energy balance calculations     │
+│   - Control algorithm framework     │
+│                                     │
+│ • automation_example.py             │
+│   - Smart optimization strategies   │
+│   - Time-of-use logic              │
+│   - Emergency protection           │
+└─────────────────────────────────────┘
+```
+
+### 3. Monitoring Layer
+```
+┌─────────────────────────────────────┐
+│          Monitoring Layer           │
+├─────────────────────────────────────┤
+│ • monitor.py                        │
+│   - Real-time data visualization    │
+│   - CLI interface with colors       │
+│   - Trend analysis                  │
+│                                     │
+│ • simple_live_monitor.py            │
+│   - Basic monitoring interface      │
+│                                     │
+│ • ui_renderer.py                    │
+│   - Rich terminal UI components     │
+└─────────────────────────────────────┘
+```
+
+### 4. Data & Analysis Layer
+```
+┌─────────────────────────────────────┐
+│        Data & Analysis Layer        │
+├─────────────────────────────────────┤
+│ • telemetry.py                      │
+│   - Data logging and storage        │
+│   - Historical analysis             │
+│                                     │
+│ • analysis.py                       │
+│   - Performance analytics           │
+│   - System optimization insights    │
+│                                     │
+│ • influxdb_pusher.py                │
+│   - Time-series database integration│
+└─────────────────────────────────────┘
+```
+
+### 5. Testing & Debugging Layer
+```
+┌─────────────────────────────────────┐
+│       Testing & Debug Layer         │
+├─────────────────────────────────────┤
+│ • test_*.py files                   │
+│   - Unit tests for hardware ops     │
+│   - Integration testing             │
+│                                     │
+│ • debug_*.py files                  │
+│   - Hardware diagnostic tools       │
+│   - Register validation             │
+│                                     │
+│ • main.py                           │
+│   - Complete system demonstration   │
+└─────────────────────────────────────┘
+```
+
+## 🔗 Data Flow Architecture
+
+```
+┌─────────────────┐    Modbus TCP    ┌─────────────────┐
+│  Sungrow        │◄─────────────────►│  modbus_client  │
+│  Inverter       │   192.168.192.10 │                 │
+│  (Hardware)     │      :502        │                 │
+└─────────────────┘                  └─────────────────┘
+                                               │
+                                               ▼
+┌─────────────────┐                  ┌─────────────────┐
+│  sungrow_       │◄─────────────────►│   config.yaml   │
+│  controller     │  Register Maps   │   53 sensors    │
+│                 │  & Scaling       │   13 controls   │
+└─────────────────┘                  └─────────────────┘
+         │                                     │
+         ▼                                     ▼
+┌─────────────────┐                  ┌─────────────────┐
+│  Automation     │                  │   Monitoring    │
+│  & Control      │                  │   & Display     │
+│                 │                  │                 │
+└─────────────────┘                  └─────────────────┘
+         │                                     │
+         ▼                                     ▼
+┌─────────────────┐                  ┌─────────────────┐
+│  Data Logging   │                  │   Analysis &    │
+│  & Telemetry    │                  │   Optimization  │
+│                 │                  │                 │
+└─────────────────┘                  └─────────────────┘
+```
+
+## 🏗️ Key Components Detail
+
+### Core Modules
+
+#### `modbus_client.py` (Communication Foundation)
+- **Purpose**: Low-level Modbus TCP communication
+- **Key Features**: 
+  - Connection management with retries
+  - Register read/write with proper endianness
+  - Error handling and recovery
+  - Support for both input/holding registers
+- **Dependencies**: pymodbus, yaml
+- **Hardware Interface**: Direct TCP connection to inverter
+
+#### `sungrow_controller.py` (Control Brain)
+- **Purpose**: High-level control and safety management
+- **Key Features**:
+  - Smart energy optimization algorithms
+  - Safety validation for all control operations
+  - Energy balance calculations
+  - Battery and grid management
+- **Dependencies**: modbus_client, config
+- **Control Capabilities**: 13 writable registers
+
+#### `config.yaml` (System Configuration)
+- **Purpose**: Centralized register and system configuration
+- **Key Features**:
+  - 53 sensor register definitions
+  - 13 control register mappings
+  - Scaling factors and data types
+  - Hardware-specific parameters
+- **Format**: YAML with register addresses, types, scaling
+
+### Monitoring & UI
+
+#### `monitor.py` (Real-time Display)
+- **Purpose**: Live system monitoring with rich terminal UI
+- **Key Features**:
+  - Real-time data updates (1-second intervals)
+  - Color-coded status indicators
+  - Rolling averages and trend analysis
+  - Energy balance visualization
+- **Dependencies**: rich, sungrow_controller
+
+#### `telemetry.py` (Data Management)
+- **Purpose**: Historical data logging and analysis
+- **Key Features**:
+  - Time-series data storage
+  - Performance analytics  
+  - System health monitoring
+  - Integration with InfluxDB
+- **Dependencies**: influxdb-client
+
+### Testing & Development
+
+#### Test Suite Structure
+- `test_modbus.py` - Low-level register testing
+- `test_solar_power.py` - Power calculation validation
+- `main.py` - Complete system integration testing
+- `debug_*.py` - Hardware diagnostic tools
+
+## 🛡️ Safety & Error Handling
+
+### Hardware Safety Layers
+1. **Connection Safety**: Automatic reconnection with exponential backoff
+2. **Register Validation**: Range checking for all register operations
+3. **Control Safety**: Validation of control parameters against limits
+4. **Emergency Protection**: Emergency stop and safe state functionality
+5. **Error Recovery**: Graceful degradation on communication failures
+
+### Error Handling Strategy
+```python
+# Hardware operations always wrapped in safety checks
+try:
+    # Validate parameters
+    if not self._validate_control_parameters(power):
+        raise ValueError("Control parameters out of safe range")
+    
+    # Execute with timeout
+    result = self.client.write_register(address, value)
+    
+    # Verify operation
+    if not self._verify_control_result(result):
+        raise ControlError("Control operation failed verification")
+        
+except Exception as e:
+    logger.error(f"Control operation failed: {e}")
+    self._enter_safe_state()
+    raise
+```
+
+## 📊 Data Models
+
+### System State
+```python
+@dataclass
+class InverterState:
+    solar_power: float          # W - Current solar generation
+    battery_soc: float          # % - Battery state of charge  
+    battery_power: float        # W - Battery charge/discharge
+    grid_power: float           # W - Grid import/export
+    grid_frequency: float       # Hz - Grid frequency
+    running_state: int          # Status code
+    timestamp: datetime         # Data timestamp
+```
+
+### Register Configuration
+```python
+@dataclass  
+class RegisterConfig:
+    address: int                # Modbus register address
+    function_code: str          # 'input' or 'holding'
+    data_type: str             # 'uint16', 'int32', etc.
+    scale_factor: float        # Scaling multiplier
+    endianness: str            # 'big' or 'little'
+    writable: bool = False     # Control register flag
+```
+
+## 🚀 Extensibility Design
+
+### Plugin Architecture
+- **Inverter Models**: Support for multiple Sungrow models via config profiles
+- **Control Algorithms**: Pluggable optimization strategies
+- **Data Outputs**: Multiple backend support (InfluxDB, SQLite, CSV)
+- **UI Interfaces**: Terminal, web, mobile-ready separation
+
+### Configuration-Driven
+- Register mappings externalized to YAML
+- Algorithm parameters configurable
+- Hardware addresses and timeouts configurable
+- UI themes and display options configurable
+
+## 🎯 Development Patterns
+
+### Key Design Principles
+1. **Hardware First**: Always consider hardware limitations and safety
+2. **Configuration Driven**: Minimize hardcoded values
+3. **Testable**: Mock hardware for unit testing
+4. **Observable**: Comprehensive logging and monitoring
+5. **Recoverable**: Graceful error handling and recovery
+6. **Extensible**: Plugin architecture for new features
+
+### Common Patterns
+- **Factory Pattern**: For different inverter models
+- **Observer Pattern**: For real-time data updates  
+- **Command Pattern**: For control operations with undo
+- **Strategy Pattern**: For different optimization algorithms
+- **Retry Pattern**: For hardware communication resilience
+
+Remember: This is a **sandbox tooling project** - architecture prioritizes experimentation, clear interfaces, and safe hardware interaction over production scalability. 
